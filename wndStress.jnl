@@ -1,0 +1,31 @@
+\can mode verify
+! Description : calculates wind stress from wind speed components
+!
+! Arguments   : Mandatory : $1 - Zonal wind speed (m/s)
+!                           $2 - Meridional wind speed (m/s)
+!               optional  : $3 - prefix to be used in output variables
+!
+! Usage       : wndStress.jnl arg1 arg2 [arg3]
+!
+! Note        : output will be available as pref_taux and pref_tauy (units of N/m^2)
+!               or as __taux and __tauy if no prefix specified
+!
+! Author : Lijo J
+! Contact: abrahamjoseph.l@incois.gov.in
+! Date   : Tuesday 08 May 2018 11:31:05 AM IST
+! Modifications : None
+!----------------------------------------------------------------------------
+
+! const
+let rho_air = 1.25 ! kg/m^3
+let cd      = 2e-3
+
+def sym pref       = $3#_#
+let ($pref)_uu     = $1
+let ($pref)_vv     = $2
+let ($pref)_wndMag = (($pref)_uu^2+($pref)_vv^2)^0.5
+
+let/title="Zonal Wnd Stress"/units="N/m^2" ($pref)_taux = rho_air*cd*($pref)_wndMag*($pref)_uu;\
+let/title="Meridional Wnd Stress"/units="N/m^2" ($pref)_tauy = rho_air*cd*($pref)_wndMag*($pref)_vv;\
+
+set mode/last verify

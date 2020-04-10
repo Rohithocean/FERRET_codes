@@ -1,0 +1,34 @@
+\cancel mode verify
+! Description : calculates geostrophic current using dynamic method
+!               (which means from Temp and Sal using thermal wind equation)
+!
+! Arguments   : Mandatory : $1 - temperature in degree celcius
+!                           $2 - salinity in PSU
+!                           $3 - depth in meters (z[gz=var])
+!
+! Usage       : geostrophicCurrentDynamicMethod.jnl arg1 arg2 arg3
+!
+! Note        : code base is from dynamic_height.jnl provided with ferret found in contrib folder
+!
+! Author : Lijo J
+! Contact: abrahamjoseph.l@incois.gov.in
+! Date   : Monday 28 May 2018 12:42:51 PM IST
+! Modifications :
+!----------------------------------------------------------------------------
+
+let dyn_t = $1 !(in degree C)
+let dyn_s = $2 !(in PSU)
+let dyn_p = $3 !(in meters or decibar)
+
+let SVanom = 1/rho_UN(dyn_s,dyn_t,dyn_p) - 1/rho_UN(35,0,dyn_p)
+! 8/99 *kob* bug fix temp was incorrectly being used in dyn_mask
+! definition.  Pointed out by Russel Fiedler
+let dyn_mask = if dyn_t[z=@nbd] eq 0 then 1
+let/title="Dynamic Height(dyn-cm)" DYN_HT  = 1E5 * dyn_mask * SVanom[z=@din]
+let/title="Geostrophic U (cm/sec)" GEO_U = -10/(1.458424E-4*SIN(Y/57.29578)) * DYN_HT[Y=@DDC]
+let/title="Geostrophic V (cm/sec)" GEO_V =  10/(1.458424E-4*SIN(Y/57.29578)) * DYN_HT[X=@DDC]
+let/title="Geostrophic U (m/sec)"/like=geo_u Ug = geo_u/100
+let/title="Geostrophic V (m/sec)"/like=geo_v Vg = geo_v/100
+
+set mode/last verify
+

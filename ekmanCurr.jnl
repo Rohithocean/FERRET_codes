@@ -1,0 +1,49 @@
+\cancel mode verify
+set data/save
+! Description : calculates Ekman Current from wind data
+!   zonal ageostrophic velocity is given by
+!   Uek     = Vcos(theta - 45) {theta + 45 for SH}
+!   where V = tau/(rho*sqrt(Af)) and theta is angle made by wind
+!   At depth z, ekman current is given by:
+!   Uek     = Vexp(-z/D)cos(theta - (45-z/D))
+!   where D = (2A/f)^0.5
+!
+! Arguments   : Mandatory : $1 - name of variable for uwind
+!                           $2 - name of variable for vwind
+!
+! Usage       : ekmanCurr.jnl arg1 arg2
+!
+! Note        : Depth z is 15 m by default
+!
+! Author : Lijo J
+! Contact: abrahamjoseph.l@incois.gov.in
+! Date   : Monday 28 May 2018 12:42:51 PM IST
+! Modifications :
+!----------------------------------------------------------------------------
+
+! consts
+let rho     = 1E03      ! kg/m^3
+let w       = 7.29212E-5 ! 1/s
+let A       = 1E-2      ! m^2/s
+let rho_air = 1.25       ! kg/m^3
+let cd      = 2e-3
+let pi      = 4*atan(1)
+
+def sym uvel  = ($1)
+def sym vvel  = ($2)
+
+let wndMag2   = ($uvel)^2+($vvel)^2
+let wndTheta  = atan2(($vvel),($uvel))
+let f         = 2*w*sin(y[gy=($uvel)]/57.29578)
+let D         = (2*A/abs(f))^0.5
+let zbyD      = 15/D ! Choose the depth required, default 15 m
+let currTheta = if y gt 0 then (wndTheta-(pi/4-zbyD)) else (wndTheta+(pi/4-zbyD))
+
+let/title="Wnd Stress"/units="N/m^2"           tau = rho_air*cd*wndMag2
+let/title="Ekman curr Magnitude"/units="m/s" ekMag = tau/(rho*(A*abs(f))^0.5)
+let/title="Zonal Ekman comp"/units="m/s"       uek = ekMag*exp(-1*zbyd)*cos(currTheta)
+let/title="Meridional Ekman comp"/units="m/s"  vek = ekMag*exp(-1*zbyd)*sin(currTheta)
+
+set data/restore
+set mode/last verify
+
