@@ -1,2 +1,3 @@
 # FERRET_codes
-This repository contains "jnl" scripts which can be ran in FERRET (Latest version recommended >7.4) 
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Rohithocean/FERRET_codes/main)
